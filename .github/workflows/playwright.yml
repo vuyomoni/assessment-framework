@@ -36,10 +36,16 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+      # Install only Chromium because this assessment targets
+      # the Chromium project configured in playwright.config.js.
+      # Installing all browsers would increase CI execution time unnecessarily.
+      # - name: Install Playwright Browsers
+      #  run: npx playwright install --with-deps
+      - name: Install Chromium Browser
+        run: npx playwright install chromium --with-deps
 
       - name: Execute Playwright Tests
+        id: tests
         run: npx playwright test
         continue-on-error: true
 
@@ -64,7 +70,14 @@ jobs:
       - name: Workflow Summary
         if: always()
         run: |
-          echo "## ✅ Assessment Framework Execution" >> $GITHUB_STEP_SUMMARY
+          echo "## Assessment Framework Execution" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📊 Live Monocart Report" >> $GITHUB_STEP_SUMMARY
+          echo "### Live Monocart Report" >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Status" >> $GITHUB_STEP_SUMMARY
+          echo "Playwright outcome: ${{ steps.tests.outcome }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail workflow if tests failed
+        if: steps.tests.outcome == 'failure'
+        run: exit 1
