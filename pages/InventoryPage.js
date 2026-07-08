@@ -130,7 +130,12 @@ class InventoryPage {
       })
     });
 
+    await expect(product, `Expected product '${productName}' to exist before opening details`).toHaveCount(1);
     await product.locator('[data-test="inventory-item-name"]').click();
+  }
+
+  async openCart() {
+    await this.cartLink.click();
   }
 }
 

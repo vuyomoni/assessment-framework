@@ -8,6 +8,8 @@ class InventoryItemPage {
     this.itemDescription = page.locator('[data-test="inventory-item-desc"]');
     this.itemPrice = page.locator('[data-test="inventory-item-price"]');
     this.itemImage = page.locator('.inventory_details_img');
+    this.addToCartButton = page.locator('[data-test^="add-to-cart"]');
+    this.removeButton = page.locator('[data-test^="remove"]');
     this.backToProductsButton = page.locator('[data-test="back-to-products"]');
   }
 
@@ -30,6 +32,17 @@ class InventoryItemPage {
       imageSrc,
       `Image mismatch for '${expectedItem.name}'. Expected src to include '${expectedItem.imageSrcIncludes}', but got '${imageSrc}'`
     ).toContain(expectedItem.imageSrcIncludes);
+  }
+
+  async addToCart() {
+    await expect(this.addToCartButton, 'Add to cart button should be visible on item details page').toBeVisible();
+    await expect(this.addToCartButton).toHaveText('Add to cart');
+    await this.addToCartButton.click();
+  }
+
+  async assertRemoveButtonDisplayed() {
+    await expect(this.removeButton, 'Remove button should be visible after item is added to cart').toBeVisible();
+    await expect(this.removeButton).toHaveText('Remove');
   }
 
   async clickBackToProducts() {
