@@ -1,1 +1,28 @@
-{"name":"assessment-framework"}
+{
+  "name": "assessment-framework",
+  "version": "1.0.0",
+  "description": "Playwright JavaScript UI and API automation assessment framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed --workers=1",
+    "test:debug": "npx playwright test --debug",
+    "test:ui": "npx playwright test tests/ui",
+    "test:login": "npx playwright test tests/ui/journeys/authentication-journey.spec.js --headed --workers=1",
+    "test:api": "npx playwright test tests/api",
+    "report": "npx playwright show-report",
+    "report:monocart": "npx monocart show-report monocart-report/index.html"
+  },
+  "keywords": [
+    "playwright",
+    "automation",
+    "ui-testing",
+    "api-testing"
+  ],
+  "author": "Cecil Vuyo Moni",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "monocart-reporter": "^2.12.2"
+  }
+}

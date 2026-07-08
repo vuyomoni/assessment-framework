@@ -1,1 +1,35 @@
-{"users":[]}
+{
+  "password": "secret_sauce",
+  "profiles": [
+    {
+      "key": "standard",
+      "username": "standard_user",
+      "description": "Baseline user for golden-path business journeys"
+    },
+    {
+      "key": "lockedOut",
+      "username": "locked_out_user",
+      "description": "Locked user profile used to observe authentication blocking behaviour"
+    },
+    {
+      "key": "problem",
+      "username": "problem_user",
+      "description": "Profile used to observe product and journey inconsistencies"
+    },
+    {
+      "key": "performanceGlitch",
+      "username": "performance_glitch_user",
+      "description": "Profile used to observe slow but valid journey behaviour"
+    },
+    {
+      "key": "error",
+      "username": "error_user",
+      "description": "Profile used to observe application interaction errors"
+    },
+    {
+      "key": "visual",
+      "username": "visual_user",
+      "description": "Profile used to observe visual differences"
+    }
+  ]
+}
