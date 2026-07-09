@@ -31,23 +31,56 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install Dependencies
         run: npm ci
 
-      # Install only Chromium because this assessment targets
-      # the Chromium project configured in playwright.config.js.
-      # Installing all browsers would increase CI execution time unnecessarily.
-      # - name: Install Playwright Browsers
-      #  run: npx playwright install --with-deps
       - name: Install Chromium Browser
         run: npx playwright install chromium --with-deps
 
+      - name: Clean Previous Reports
+        run: |
+          rm -rf monocart-report
+          rm -rf playwright-report
+          rm -rf test-results
+
       - name: Execute Playwright Tests
         id: tests
-        run: npx playwright test tests/api
+        run: npx playwright test
         continue-on-error: true
+
+      - name: Add Run Metadata To Monocart Report
+        if: always()
+        run: |
+          mkdir -p monocart-report
+
+          cat > monocart-report/run-info.html <<EOF
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Run Info</title>
+            </head>
+            <body>
+              <h1>Assessment Framework Report</h1>
+              <p><strong>Run ID:</strong> ${{ github.run_id }}</p>
+              <p><strong>Run Number:</strong> ${{ github.run_number }}</p>
+              <p><strong>Commit:</strong> ${{ github.sha }}</p>
+              <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+              <p><strong>Triggered By:</strong> ${{ github.actor }}</p>
+              <p><strong>Workflow:</strong> ${{ github.workflow }}</p>
+            </body>
+          </html>
+          EOF
+
+      - name: Verify Monocart Report
+        if: always()
+        run: |
+          echo "Checking Monocart report output..."
+          ls -la
+          ls -la monocart-report || true
+          test -f monocart-report/index.html
 
       - name: Upload Playwright Report
         if: always()
@@ -74,6 +107,12 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Live Monocart Report" >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Run Metadata" >> $GITHUB_STEP_SUMMARY
+          echo "Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "Run Number: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Test Status" >> $GITHUB_STEP_SUMMARY
           echo "Playwright outcome: ${{ steps.tests.outcome }}" >> $GITHUB_STEP_SUMMARY
