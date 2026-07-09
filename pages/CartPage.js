@@ -55,6 +55,26 @@ class CartPage {
   async clickCheckout() {
     await this.checkoutButton.click();
   }
+  async removeProduct(productName) {
+  const item = this.cartItems.filter({
+    has: this.page.locator('[data-test="inventory-item-name"]', {
+      hasText: productName
+    })
+  });
+
+  await expect(item, `Expected cart item '${productName}' to exist before removal`).toHaveCount(1);
+  await item.locator('[data-test^="remove"]').click();
+}
+
+async assertProductNotDisplayed(productName) {
+  const item = this.cartItems.filter({
+    has: this.page.locator('[data-test="inventory-item-name"]', {
+      hasText: productName
+    })
+  });
+
+  await expect(item, `Expected cart item '${productName}' to be removed`).toHaveCount(0);
+}
 }
 
 module.exports = { CartPage };

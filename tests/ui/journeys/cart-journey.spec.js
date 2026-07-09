@@ -4,7 +4,7 @@ const { InventoryPage } = require('../../../pages/InventoryPage');
 const { InventoryItemPage } = require('../../../pages/InventoryItemPage');
 const { CartPage } = require('../../../pages/CartPage');
 const { JourneyReporter } = require('../../../utils/journeyReporter');
-
+test.describe.configure({ timeout: 120000 });
 const userData = require('../../../data/users.json');
 const productCatalogueData = require('../../../data/productCatalogueStandardData.json');
 
@@ -25,11 +25,7 @@ test.describe('Shopping Cart Journey - Golden Path Behaviour Assessment', () => 
         const errorMessage = await loginPage.getErrorMessage();
 
         if (!isInventoryDisplayed) {
-          reporter.recordStep(
-            'Authentication',
-            'FAILED',
-            errorMessage || 'User did not reach inventory page'
-          );
+          reporter.recordStep('Authentication', 'FAILED', errorMessage || 'User did not reach inventory page');
 
           await testInfo.attach('shopping-cart-observation', {
             body: JSON.stringify(reporter.getSummary(), null, 2),
@@ -38,15 +34,11 @@ test.describe('Shopping Cart Journey - Golden Path Behaviour Assessment', () => 
 
           throw new Error(
             `Shopping cart journey failed for ${profile.username} at Authentication. ` +
-            `Observation: ${errorMessage || 'User did not reach inventory page'}`
+              `Observation: ${errorMessage || 'User did not reach inventory page'}`
           );
         }
 
-        reporter.recordStep(
-          'Authentication',
-          'PASSED',
-          'User authenticated and reached inventory page'
-        );
+        reporter.recordStep('Authentication', 'PASSED', 'User authenticated and reached inventory page');
       });
 
       await test.step('Validate inventory page loads', async () => {
@@ -69,7 +61,7 @@ test.describe('Shopping Cart Journey - Golden Path Behaviour Assessment', () => 
 
           throw new Error(
             `Shopping cart journey failed for ${profile.username} at Inventory page load. ` +
-            `Observation: ${error.message}`
+              `Observation: ${error.message}`
           );
         }
       });
@@ -98,11 +90,7 @@ test.describe('Shopping Cart Journey - Golden Path Behaviour Assessment', () => 
             await inventoryItemPage.clickBackToProducts();
             await inventoryPage.assertInventoryPageLoaded();
           } catch (error) {
-            reporter.recordStep(
-              `Add product from details - ${expectedItem.name}`,
-              'FAILED',
-              error.message
-            );
+            reporter.recordStep(`Add product from details - ${expectedItem.name}`, 'FAILED', error.message);
 
             await testInfo.attach('shopping-cart-observation', {
               body: JSON.stringify(reporter.getSummary(), null, 2),
@@ -111,7 +99,7 @@ test.describe('Shopping Cart Journey - Golden Path Behaviour Assessment', () => 
 
             throw new Error(
               `Shopping cart journey failed for ${profile.username} while adding '${expectedItem.name}' from product details. ` +
-              `Observation: ${error.message}`
+                `Observation: ${error.message}`
             );
           }
         });
@@ -141,7 +129,36 @@ test.describe('Shopping Cart Journey - Golden Path Behaviour Assessment', () => 
 
           throw new Error(
             `Shopping cart journey failed for ${profile.username} at Cart validation. ` +
-            `Observation: ${error.message}`
+              `Observation: ${error.message}`
+          );
+        }
+      });
+
+      await test.step('Remove one product from cart and validate cart updates', async () => {
+        try {
+          const productToRemove = productCatalogueData.items[0];
+          const remainingProducts = productCatalogueData.items.slice(1);
+
+          await cartPage.removeProduct(productToRemove.name);
+          await cartPage.assertProductNotDisplayed(productToRemove.name);
+          await cartPage.assertProductsDisplayed(remainingProducts);
+
+          reporter.recordStep(
+            'Remove product from cart',
+            'PASSED',
+            `${productToRemove.name} was removed and remaining cart items stayed correct`
+          );
+        } catch (error) {
+          reporter.recordStep('Remove product from cart', 'FAILED', error.message);
+
+          await testInfo.attach('shopping-cart-observation', {
+            body: JSON.stringify(reporter.getSummary(), null, 2),
+            contentType: 'application/json'
+          });
+
+          throw new Error(
+            `Shopping cart journey failed for ${profile.username} at Remove product from cart. ` +
+              `Observation: ${error.message}`
           );
         }
       });

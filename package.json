@@ -16,6 +16,7 @@
     "test:inventorySorting": "npx playwright test tests/ui/journeys/inventory-sorting-journey.spec.js --headed --workers=1",
     "test:cart": "npx playwright test tests/ui/journeys/cart-journey.spec.js --headed --workers=1",
     "test:checkout": "npx playwright test tests/ui/journeys/checkout-journey.spec.js --headed --workers=1",
+    "test:checkoutValidation": "npx playwright test tests/ui/journeys/checkout-validation-journey.spec.js --headed --workers=1",
     "test:api": "npx playwright test tests/api",
     "test:smoke": "npx playwright test tests/ui/journeys/authentication-journey.spec.js" ,
     "test:regression": "npx playwright test tests/ui",
