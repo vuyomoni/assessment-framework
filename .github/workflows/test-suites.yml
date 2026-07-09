@@ -1,11 +1,18 @@
-name: Playwright Automation Tests
+name: Playwright Test Suites
 
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
   workflow_dispatch:
+    inputs:
+      suite:
+        description: "Select test suite to run"
+        required: true
+        default: "smoke"
+        type: choice
+        options:
+          - smoke
+          - regression
+          - api
+          - all
 
 permissions:
   contents: read
@@ -31,29 +38,36 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install Dependencies
         run: npm ci
 
-      # Install only Chromium because this assessment targets
-      # the Chromium project configured in playwright.config.js.
-      # Installing all browsers would increase CI execution time unnecessarily.
-      # - name: Install Playwright Browsers
-      #  run: npx playwright install --with-deps
       - name: Install Chromium Browser
         run: npx playwright install chromium --with-deps
 
-      - name: Execute Playwright Tests
+      - name: Execute Selected Test Suite
         id: tests
-        run: npx playwright test tests/api
+        run: |
+          if [ "${{ github.event.inputs.suite }}" = "smoke" ]; then
+            npm run test:smoke
+          elif [ "${{ github.event.inputs.suite }}" = "regression" ]; then
+            npm run test:regression
+          elif [ "${{ github.event.inputs.suite }}" = "api" ]; then
+            npm run test:api:ci
+          elif [ "${{ github.event.inputs.suite }}" = "all" ]; then
+            npm test
+          else
+            echo "Invalid suite selected"
+            exit 1
+          fi
         continue-on-error: true
 
       - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ github.event.inputs.suite }}
           path: playwright-report
 
       - name: Publish Monocart Report
@@ -71,6 +85,9 @@ jobs:
         if: always()
         run: |
           echo "## Assessment Framework Execution" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Selected Suite" >> $GITHUB_STEP_SUMMARY
+          echo "${{ github.event.inputs.suite }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Live Monocart Report" >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
