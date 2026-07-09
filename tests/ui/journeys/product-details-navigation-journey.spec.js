@@ -8,7 +8,7 @@ const productCatalogueData = require('../../../data/productCatalogueStandardData
 
 test.describe('Product Details Navigation Journey - Golden Path Behaviour Assessment', () => {
   for (const profile of userData.profiles) {
-    test(`Product details navigation check for ${profFile.username}`, async ({ page }, testInfo) => {
+    test(`Product details navigation check for ${profile.username}`, async ({ page }, testInfo) => {
       const loginPage = new LoginPage(page);
       const inventoryPage = new InventoryPage(page);
       const inventoryItemPage = new InventoryItemPage(page);
