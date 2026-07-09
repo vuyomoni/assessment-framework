@@ -46,7 +46,7 @@ jobs:
 
       - name: Execute Playwright Tests
         id: tests
-        run: npx playwright test tests
+        run: npx playwright test
         continue-on-error: true
 
       - name: Upload Playwright Report
