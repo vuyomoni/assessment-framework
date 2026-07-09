@@ -1,0 +1,45 @@
+{
+  "authentication": {
+    "username": "admin",
+    "password": "password123"
+  },
+
+  "createBooking": {
+    "firstname": "Cecil",
+    "lastname": "Moni",
+    "totalprice": 1500,
+    "depositpaid": true,
+    "bookingdates": {
+      "checkin": "2026-08-01",
+      "checkout": "2026-08-10"
+    },
+    "additionalneeds": "Breakfast"
+  },
+
+  "updateBooking": {
+    "firstname": "Cecil Updated",
+    "lastname": "Moni",
+    "totalprice": 2000,
+    "depositpaid": false,
+    "bookingdates": {
+      "checkin": "2026-09-01",
+      "checkout": "2026-09-12"
+    },
+    "additionalneeds": "Lunch"
+  },
+
+  "partialUpdate": {
+    "firstname": "Automation",
+    "additionalneeds": "Dinner"
+  },
+
+  "expectedResponses": {
+    "authStatus": 200,
+    "createStatus": 200,
+    "getStatus": 200,
+    "updateStatus": 200,
+    "partialUpdateStatus": 200,
+    "deleteStatus": 201,
+    "notFoundStatus": 404
+  }
+}
