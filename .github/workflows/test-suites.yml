@@ -46,6 +46,12 @@ jobs:
       - name: Install Chromium Browser
         run: npx playwright install chromium --with-deps
 
+      - name: Clean Previous Reports
+        run: |
+          rm -rf monocart-report
+          rm -rf playwright-report
+          rm -rf test-results
+
       - name: Execute Selected Test Suite
         id: tests
         run: |
@@ -62,6 +68,39 @@ jobs:
             exit 1
           fi
         continue-on-error: true
+
+      - name: Add Run Metadata To Monocart Report
+        if: always()
+        run: |
+          mkdir -p monocart-report
+
+          cat > monocart-report/run-info.html <<EOF
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Run Info</title>
+            </head>
+            <body>
+              <h1>Assessment Framework Report</h1>
+              <p><strong>Suite:</strong> ${{ github.event.inputs.suite }}</p>
+              <p><strong>Run ID:</strong> ${{ github.run_id }}</p>
+              <p><strong>Run Number:</strong> ${{ github.run_number }}</p>
+              <p><strong>Commit:</strong> ${{ github.sha }}</p>
+              <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+              <p><strong>Triggered By:</strong> ${{ github.actor }}</p>
+              <p><strong>Workflow:</strong> ${{ github.workflow }}</p>
+            </body>
+          </html>
+          EOF
+
+      - name: Verify Monocart Report
+        if: always()
+        run: |
+          echo "Checking Monocart report output..."
+          ls -la
+          ls -la monocart-report || true
+          test -f monocart-report/index.html
 
       - name: Upload Playwright Report
         if: always()
@@ -91,6 +130,12 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Live Monocart Report" >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Run Metadata" >> $GITHUB_STEP_SUMMARY
+          echo "Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "Run Number: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Test Status" >> $GITHUB_STEP_SUMMARY
           echo "Playwright outcome: ${{ steps.tests.outcome }}" >> $GITHUB_STEP_SUMMARY
